@@ -17,6 +17,7 @@ namespace WindowsFormsApp1
         public Form1()
         {
             InitializeComponent();
+             button1.Text = "Generate";
         }
 
         private void button1_Click(object sender, EventArgs e)
