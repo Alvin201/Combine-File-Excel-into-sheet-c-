@@ -86,7 +86,7 @@ namespace WindowsFormsApp1
             app.Quit();
             Marshal.ReleaseComObject(app);
             GC.Collect();
-            MessageBox.Show("Complete",MessageBoxIcon.Information.ToString("Information"));
+             MessageBox.Show("Complete", "Message Success", MessageBoxButtons.OK,MessageBoxIcon.Information);
         }
     }
 }
