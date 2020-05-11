@@ -17,7 +17,7 @@ namespace WindowsFormsApp1
         public Form1()
         {
             InitializeComponent();
-             button1.Text = "Generate";
+            button1.Text = "Generate";
         }
 
         private void button1_Click(object sender, EventArgs e)
@@ -78,7 +78,12 @@ namespace WindowsFormsApp1
                 }
             }
             app.Worksheets["Sheet1"].Delete();
-            app.Workbooks[1].SaveCopyAs(@"C:\pandora\data\export\Reconcile_Paperless.xlsx");
+            string filename = "Reconcile_Paperless_" + DateTime.Now.ToString("ddMMyyyy") + ".xlsx";
+
+            app.Workbooks[1].SaveAs(@"C:\pandora\data\export\" + filename, Excel.XlFileFormat.xlOpenXMLWorkbook, Missing.Value,
+            Missing.Value, false, false, Excel.XlSaveAsAccessMode.xlNoChange,
+            Excel.XlSaveConflictResolution.xlUserResolution, true,
+            Missing.Value, Missing.Value, Missing.Value);
             w1.Close(0);
             w2.Close(0);
             w3.Close(0);
@@ -86,7 +91,9 @@ namespace WindowsFormsApp1
             app.Quit();
             Marshal.ReleaseComObject(app);
             GC.Collect();
-             MessageBox.Show("Complete", "Message Success", MessageBoxButtons.OK,MessageBoxIcon.Information);
+            MessageBox.Show("Complete", "Message Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
         }
+
+       
     }
 }
