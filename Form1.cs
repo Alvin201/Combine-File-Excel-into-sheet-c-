@@ -18,32 +18,84 @@ namespace WindowsFormsApp1
         public Form1()
         {
             InitializeComponent();
-            button1.Text = "Generate";
+            generate_button.Text = "Generate";
             browse_button.Text = "Browse";
             upload_button.Text = "Upload";
+            listBox2.MouseDoubleClick += new MouseEventHandler(listBox2_DoubleClick);
             listBox1.MouseDoubleClick += new MouseEventHandler(listBox1_DoubleClick);
         }
 
-        private void button1_Click(object sender, EventArgs e)
+        private static void delete_multiple_file()
         {
-            string pathlocation = @"C:\pandora\data\export\";
-            string filename = "Reconcile_Paperless_*.xlsx";
-          
-            foreach (string file in Directory.EnumerateFiles(pathlocation, filename))
+            string pathlocation = @"C:\pandora\data\export\source\temp\";
+            var dir = new DirectoryInfo(pathlocation);
+            foreach (var file in dir.EnumerateFiles("*.xlsx"))
             {
+                file.Delete();
+            }
+        }
 
-                if (File.Exists(file))
+        private static void delete_multiple_file_reconcille()
+        {
+            string pathlocation = @"C:\pandora\data\export\source\temp\";
+            var dir = new DirectoryInfo(pathlocation);
+            foreach (var file in dir.EnumerateFiles("Reconcile_Paperless_*.xlsx"))
+            {
+                file.Delete();
+            }
+        }
+
+        private void generate_button_Click(object sender, EventArgs e)
+        {
+
+            string pathlocation = @"C:\pandora\data\export\source\";
+            string filename = "Reconcile_Paperless_*.xlsx";
+
+            if (listBox2.Items.Count > 0)
+            {
+                foreach (string file in Directory.EnumerateFiles(pathlocation, filename))
                 {
+                    if (File.Exists(file))
+                    {
                         MergeExcelNew();
-                }
-                else
-                {
-                    MessageBox.Show("file not exist", "Warning", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-
+                        listBox2.Items.Clear();
+                    }
+                    else
+                    {
+                        MessageBox.Show("file not exist", "Warning", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    }
                 }
             }
+            else
+            {
+                MessageBox.Show("Please upload file", "Warning", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            }
 
+        }
 
+        private void List_1()
+        {
+            DirectoryInfo dinfo = new DirectoryInfo(@"C:\\pandora\\data\\export\\source\\temp\\");
+            FileInfo[] Files = dinfo.GetFiles("*.xlsx");
+            foreach (FileInfo file in Files)
+            {
+                listBox1.Items.Add(file.FullName);
+            }
+        }
+
+        private void List_2()
+        {
+            DirectoryInfo dinfo = new DirectoryInfo(@"C:\\pandora\\data\\export\\source\\");
+            FileInfo[] Files = dinfo.GetFiles("*.xlsx");
+            foreach (FileInfo file in Files)
+            {
+                listBox2.Items.Add(file.FullName); //note FullName, not Name
+            }
+        }
+        private void Form1_Load(object sender, EventArgs e)
+        {
+            List_1();
+            List_2();
         }
 
         private static void MergeExcelNew()       
@@ -88,7 +140,8 @@ namespace WindowsFormsApp1
             #endregion merged
             var app = new Excel.Application();
             app.Visible = true;
-            string pathlocation = @"C:\pandora\data\export\";
+            string pathlocation = @"C:\pandora\data\export\source\";
+            string resultpathlocation = @"C:\pandora\data\export\";
             string excelfilename = "Reconcile_Paperless_";
             string CDM = "CDM.xlsx";
             string IWID = "IWID.xlsx";
@@ -100,17 +153,17 @@ namespace WindowsFormsApp1
             Excel.Workbook w4 = app.Workbooks.Add(pathlocation + excelfilename + Count);
 
             for (int i = 2; i <= app.Workbooks.Count; i++)
-            {
-                for (int j = 1; j <= app.Workbooks[i].Worksheets.Count; j++)
                 {
-                    Excel.Worksheet ws = (Excel.Worksheet)app.Workbooks[i].Worksheets[j];
-                    ws.Copy(app.Workbooks[1].Worksheets[1]);
+                    for (int j = 1; j <= app.Workbooks[i].Worksheets.Count; j++)
+                    {
+                        Excel.Worksheet ws = (Excel.Worksheet)app.Workbooks[i].Worksheets[j];
+                        ws.Copy(app.Workbooks[1].Worksheets[1]);
+                    }
                 }
-            }
-            app.Worksheets["Sheet1"].Delete();
 
+            app.Worksheets["Sheet1"].Delete();
             string filenameresult = "Reconcile_Paperless" + DateTime.Now.ToString("dd-MMMM-yyyy HHmmss") + ".xlsx";
-            app.Workbooks[1].SaveAs(pathlocation + filenameresult, Excel.XlFileFormat.xlOpenXMLWorkbook, Missing.Value,
+            app.Workbooks[1].SaveAs(resultpathlocation + filenameresult, Excel.XlFileFormat.xlOpenXMLWorkbook, Missing.Value,
             Missing.Value, false, false, Excel.XlSaveAsAccessMode.xlNoChange,
             Excel.XlSaveConflictResolution.xlUserResolution, true,
             Missing.Value, Missing.Value, Missing.Value);
@@ -124,18 +177,16 @@ namespace WindowsFormsApp1
             Marshal.ReleaseComObject(app);
             GC.Collect();
 
-            //delete multiple files
-            var dir = new DirectoryInfo(pathlocation);
-            foreach (var file in dir.EnumerateFiles("Reconcile_Paperless_*.xlsx"))
-            {
-                file.Delete();
-            }
+            //delete multiple files contains reconcille
+            delete_multiple_file_reconcille();
 
             MessageBox.Show("Complete", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            
         }
 
         private void browse_button_Click(object sender, EventArgs e)
         {
+            string extractPath = @"C:\pandora\data\export\source\temp\";
             this.openFileDialog1.Filter = "XLS files|*.xlsx";
             this.openFileDialog1.Title = "Please Select Excel Source File(s) for Consolidation";
             this.openFileDialog1.FilterIndex = 2;
@@ -144,16 +195,16 @@ namespace WindowsFormsApp1
 
             if (openFileDialog1.ShowDialog() == DialogResult.OK) // Test result.
             {
-                foreach (string FileName in openFileDialog1.SafeFileNames)
+                int count = 0;
+                string[] FilenameName;
+                foreach (string item in openFileDialog1.FileNames)
                 {
-                    listBox1.Items.Add(System.IO.Path.GetFileNameWithoutExtension(FileName));
+                        FilenameName = item.Split('\\');
+                        File.Copy(item, extractPath + FilenameName[FilenameName.Length - 1]);
+                        listBox1.Items.Add(System.IO.Path.Combine(extractPath,FilenameName[FilenameName.Length - 1]));
+                        count++;
                 }
             }
-        }
-
-        private void openFileDialog1_FileOk(object sender, CancelEventArgs e)
-        {
-
         }
 
 
@@ -170,42 +221,80 @@ namespace WindowsFormsApp1
                 {
                     // do what you want!!
                     foreach (string item in openFileDialog1.FileNames)
-                    {
+                    { 
                         FilenameName = item.Split('\\');
-                        File.Copy(item, @"C:\pandora\data\export\" + FilenameName[FilenameName.Length - 1]);
+                        File.Copy(item, @"C:\pandora\data\export\source\" + FilenameName[FilenameName.Length - 1]);
                         count++;
                     }
                     MessageBox.Show(Convert.ToString(count) + " File(s) copied");
-                    listBox1.Items.Clear();
 
+                    #region move list2 with selected
+                    //for (int intCount = listBox1.SelectedItems.Count - 1; intCount >= 0; intCount--)
+                    //{
+                    //    listBox2.Items.Add(listBox1.SelectedItems[intCount]);
+                    //    listBox1.Items.Remove(listBox1.SelectedItems[intCount]);
+                    //}
+                    #endregion
+                    
+                    ////move list2 all
+                    DirectoryInfo dinfo = new DirectoryInfo(@"C:\\pandora\\data\\export\\source\\");
+                    FileInfo[] Files = dinfo.GetFiles("*.xlsx");
+                    foreach (FileInfo file in Files)
+                    {
+                        listBox2.Items.Add(file.FullName);
+                        listBox1.Items.Clear();
+                    }
+
+                    //delete multiple files
+                    delete_multiple_file();
+
+
+                    #region
+                    //for (int i = 0; i < listBox1.Items.Count; i++)
+                    //{
+                    //    listBox2.Items.Add(listBox1.Items[i].ToString());
+                    //    listBox1.Items.Clear();
+                    //}
+                    #endregion
                 }
                 else if (result == DialogResult.No)
                 {
-                    //do what you want!!
                     MessageBox.Show("Canceled");
                 }
             }
             else
             {
-                // It doesn't
                 MessageBox.Show("Please upload file", "Warning", MessageBoxButtons.OK, MessageBoxIcon.Warning);
 
-
             }
 
         }
 
-        private void listBox1_DoubleClick(object sender, MouseEventArgs e)
+        
+        private void listBox2_DoubleClick(object sender, EventArgs e)
         {
-            int index = this.listBox1.IndexFromPoint(e.Location);
-            if (index != System.Windows.Forms.ListBox.NoMatches)
+            if (listBox2.SelectedIndex != -1)
             {
-                //MessageBox.Show(listBox1.SelectedItem.ToString());
-                listBox1.Items.Remove(listBox1.SelectedItem.ToString());
-                listBox1.SelectedIndex = -1;
+                string filepath = listBox2.Items[listBox2.SelectedIndex].ToString();
+
+                if (File.Exists(filepath))
+                    File.Delete(filepath);
+                listBox2.Items.RemoveAt(listBox2.SelectedIndex);
             }
         }
 
+        private void listBox1_DoubleClick(object sender, EventArgs e)
+        {
+            if (listBox1.SelectedIndex != -1)
+            {
+                string filepath = listBox1.Items[listBox1.SelectedIndex].ToString();
 
+                if (File.Exists(filepath))
+                    File.Delete(filepath);
+                listBox1.Items.RemoveAt(listBox1.SelectedIndex);
+
+            }
+
+        }
     }
 }
