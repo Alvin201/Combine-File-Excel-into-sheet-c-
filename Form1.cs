@@ -21,7 +21,7 @@ namespace WindowsFormsApp1
             generate_button.Text = "Generate";
             browse_button.Text = "Browse";
             upload_button.Text = "Upload";
-
+            
             listBox2.MouseDoubleClick += new MouseEventHandler(listBox2_DoubleClick);
             listBox1.MouseDoubleClick += new MouseEventHandler(listBox1_DoubleClick);
         }
@@ -102,7 +102,7 @@ namespace WindowsFormsApp1
         private static void MergeExcelNew()       
         {
 
-            #region merged
+            #region merged excel
             //    var app = new Microsoft.Office.Interop.Excel.Application();
             //    Workbook bookDest = null;
             //    Worksheet sheetDest = null;
