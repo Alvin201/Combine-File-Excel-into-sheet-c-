@@ -21,7 +21,7 @@ namespace WindowsFormsApp1
             generate_button.Text = "Generate";
             browse_button.Text = "Browse";
             upload_button.Text = "Upload";
-            
+
             listBox2.MouseDoubleClick += new MouseEventHandler(listBox2_DoubleClick);
             listBox1.MouseDoubleClick += new MouseEventHandler(listBox1_DoubleClick);
         }
@@ -38,7 +38,7 @@ namespace WindowsFormsApp1
 
         private static void delete_multiple_file_reconcille()
         {
-            string pathlocation = @"C:\pandora\data\export\source\temp\";
+            string pathlocation = @"C:\pandora\data\export\source\";
             var dir = new DirectoryInfo(pathlocation);
             foreach (var file in dir.EnumerateFiles("Reconcile_Paperless_*.xlsx"))
             {
@@ -102,7 +102,7 @@ namespace WindowsFormsApp1
         private static void MergeExcelNew()       
         {
 
-            #region merged excel
+            #region merged
             //    var app = new Microsoft.Office.Interop.Excel.Application();
             //    Workbook bookDest = null;
             //    Worksheet sheetDest = null;
@@ -192,7 +192,8 @@ namespace WindowsFormsApp1
 
         private void browse_button_Click(object sender, EventArgs e)
         {
-            string extractPath = @"C:\pandora\data\export\source\temp\";
+            
+            string pathlocation = @"C:\pandora\data\export\source\temp\";
             this.openFileDialog1.Filter = "XLS files|*.xlsx";
             this.openFileDialog1.Title = "Please Select Excel Source File(s) for Consolidation";
             this.openFileDialog1.FilterIndex = 2;
@@ -205,7 +206,7 @@ namespace WindowsFormsApp1
                 int count = 0;
                 string name = "Reconcile_Paperless_";
                 string ext = ".xlsx";
-                string[] myFiles = Directory.GetFiles(extractPath);
+                string[] myFiles = Directory.GetFiles(pathlocation);
 
                 foreach (string item in openFileDialog1.FileNames)
                 {
@@ -215,8 +216,8 @@ namespace WindowsFormsApp1
                     //validate filename
                     if (fileName.StartsWith(name) && fileName.EndsWith(ext))
                     {
-                        File.Copy(item, extractPath + splitName[splitName.Length - 1]);
-                        listBox1.Items.Add(System.IO.Path.Combine(extractPath, splitName[splitName.Length - 1]));
+                        File.Copy(item, pathlocation + splitName[splitName.Length - 1]);
+                        listBox1.Items.Add(System.IO.Path.Combine(pathlocation, splitName[splitName.Length - 1]));
                         count++;
 
                         //foreach (string item in openFileDialog1.FileNames)
@@ -241,6 +242,7 @@ namespace WindowsFormsApp1
         {
             int count = 0;
             string[] FilenameName;
+            string pathlocation = @"C:\pandora\data\export\source\";
 
             if (listBox1.Items.Count > 0)
             {
@@ -251,7 +253,7 @@ namespace WindowsFormsApp1
                     foreach (string item in openFileDialog1.FileNames)
                     { 
                         FilenameName = item.Split('\\');
-                        File.Copy(item, @"C:\pandora\data\export\source\" + FilenameName[FilenameName.Length - 1]);
+                        File.Copy(item, pathlocation + FilenameName[FilenameName.Length - 1]);
                         count++;
                     }
                     MessageBox.Show(Convert.ToString(count) + " File(s) copied");
@@ -265,7 +267,7 @@ namespace WindowsFormsApp1
                     #endregion
                     
                     ////move list2 all
-                    DirectoryInfo dinfo = new DirectoryInfo(@"C:\\pandora\\data\\export\\source\\");
+                    DirectoryInfo dinfo = new DirectoryInfo(pathlocation);
                     FileInfo[] Files = dinfo.GetFiles("*.xlsx");
                     foreach (FileInfo file in Files)
                     {
