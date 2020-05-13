@@ -21,6 +21,7 @@ namespace WindowsFormsApp1
             generate_button.Text = "Generate";
             browse_button.Text = "Browse";
             upload_button.Text = "Upload";
+
             listBox2.MouseDoubleClick += new MouseEventHandler(listBox2_DoubleClick);
             listBox1.MouseDoubleClick += new MouseEventHandler(listBox1_DoubleClick);
         }
@@ -100,6 +101,7 @@ namespace WindowsFormsApp1
 
         private static void MergeExcelNew()       
         {
+
             #region merged
             //    var app = new Microsoft.Office.Interop.Excel.Application();
             //    Workbook bookDest = null;
@@ -138,7 +140,10 @@ namespace WindowsFormsApp1
             //    }
             //}
             #endregion merged
+
+            //var excelnames = new string[] {"*.xlsx"};
             var app = new Excel.Application();
+            
             app.Visible = true;
             string pathlocation = @"C:\pandora\data\export\source\";
             string resultpathlocation = @"C:\pandora\data\export\";
@@ -152,7 +157,8 @@ namespace WindowsFormsApp1
             Excel.Workbook w3 = app.Workbooks.Add(pathlocation + excelfilename + IWID);
             Excel.Workbook w4 = app.Workbooks.Add(pathlocation + excelfilename + Count);
 
-            for (int i = 2; i <= app.Workbooks.Count; i++)
+           
+                for (int i = 2; i <= app.Workbooks.Count; i++)
                 {
                     for (int j = 1; j <= app.Workbooks[i].Worksheets.Count; j++)
                     {
@@ -160,7 +166,7 @@ namespace WindowsFormsApp1
                         ws.Copy(app.Workbooks[1].Worksheets[1]);
                     }
                 }
-
+           
             app.Worksheets["Sheet1"].Delete();
             string filenameresult = "Reconcile_Paperless" + DateTime.Now.ToString("dd-MMMM-yyyy HHmmss") + ".xlsx";
             app.Workbooks[1].SaveAs(resultpathlocation + filenameresult, Excel.XlFileFormat.xlOpenXMLWorkbook, Missing.Value,
@@ -195,14 +201,37 @@ namespace WindowsFormsApp1
 
             if (openFileDialog1.ShowDialog() == DialogResult.OK) // Test result.
             {
+                //string[] FilenameName;
                 int count = 0;
-                string[] FilenameName;
+                string name = "Reconcile_Paperless_";
+                string ext = ".xlsx";
+                string[] myFiles = Directory.GetFiles(extractPath);
+
                 foreach (string item in openFileDialog1.FileNames)
                 {
-                        FilenameName = item.Split('\\');
-                        File.Copy(item, extractPath + FilenameName[FilenameName.Length - 1]);
-                        listBox1.Items.Add(System.IO.Path.Combine(extractPath,FilenameName[FilenameName.Length - 1]));
+                    string[] splitName = item.Split('\\');
+                    string fileName = splitName[splitName.Length - 1];
+                    
+                    //validate filename
+                    if (fileName.StartsWith(name) && fileName.EndsWith(ext))
+                    {
+                        File.Copy(item, extractPath + splitName[splitName.Length - 1]);
+                        listBox1.Items.Add(System.IO.Path.Combine(extractPath, splitName[splitName.Length - 1]));
                         count++;
+
+                        //foreach (string item in openFileDialog1.FileNames)
+                        //{
+                        //    FilenameName = item.Split('\\');
+                        //    File.Copy(item, extractPath + FilenameName[FilenameName.Length - 1]);
+                        //    listBox1.Items.Add(System.IO.Path.Combine(extractPath, FilenameName[FilenameName.Length - 1]));
+                        //    count++;
+                        //}
+                    }
+                    else
+                    {
+                        MessageBox.Show("Filename must be {Reconcile_Paperless_*.xlsx}", "Warning", MessageBoxButtons.OK, MessageBoxIcon.Information);
+
+                    }
                 }
             }
         }
@@ -215,7 +244,6 @@ namespace WindowsFormsApp1
 
             if (listBox1.Items.Count > 0)
             {
-
                 DialogResult result = MessageBox.Show("Please do check again your files?", "Confirmation", MessageBoxButtons.YesNoCancel);
                 if (result == DialogResult.Yes)
                 {
