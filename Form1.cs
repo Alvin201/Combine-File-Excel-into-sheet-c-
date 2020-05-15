@@ -154,23 +154,33 @@ namespace WindowsFormsApp1
             string Count = "Count.xlsx";
 
             Excel.Workbook w1 = app.Workbooks.Add(@"C:\pandora\data\export\Reconcile_Paperless.xlsx");
-            //Excel.Workbook w2 = app.Workbooks.Add(pathlocation + excelfilename + CDM);
-            //Excel.Workbook w3 = app.Workbooks.Add(pathlocation + excelfilename + IWID);
-            //Excel.Workbook w4 = app.Workbooks.Add(pathlocation + excelfilename + Count);
-
-            //Excel.Workbook w2 = app.Workbooks.Add("C:\\pandora\\data\\export\\source\\**.xlsx", 0, true, 5, "", "", true, Microsoft.Office.Interop.Excel.XlPlatform.xlWindows, "\t", false, false, 0, true, 1, 0);
-            Excel.Workbook w2 = app.Workbooks.Add("C:\\pandora\\data\\export\\source\\**.xlsx");
+            Excel.Workbook w2 = app.Workbooks.Add(pathlocation + excelfilename + CDM);
+            Excel.Workbook w3 = app.Workbooks.Add(pathlocation + excelfilename + IWID);
+            Excel.Workbook w4 = app.Workbooks.Add(pathlocation + excelfilename + Count);
 
 
-            for (int i = 2; i <= app.Workbooks.Count; i++)
-                {
-                    for (int j = 1; j <= app.Workbooks[i].Worksheets.Count; j++)
+            //string[] ext = new string[2] { "*.xlsx", "*.xls" };
+
+            //foreach (string found in ext)
+            //{
+            //    string[] extracted = Directory.GetFiles(@"C:\pandora\data\export\source", found, System.IO.SearchOption.AllDirectories);
+            //    foreach (string file in extracted)
+            //    {
+            //        Console.WriteLine(file);
+            //    }
+            //}
+
+
+
+            int wb_count = app.Workbooks.Count;
+                    for (int i = 2; i <= wb_count; i++)
                     {
-                        Excel.Worksheet ws = (Excel.Worksheet)app.Workbooks[i].Worksheets[j];
-                        ws.Copy(app.Workbooks[1].Worksheets[1]);
+                        for (int j = 1; j <= app.Workbooks[i].Worksheets.Count; j++)
+                        {
+                            Excel.Worksheet ws = (Excel.Worksheet)app.Workbooks[i].Worksheets[j];
+                            ws.Copy(Before: app.Workbooks[1].Worksheets[1]);
+                        }
                     }
-                }
-           
             app.Worksheets["Sheet1"].Delete();
             string filenameresult = "Reconcile_Paperless" + DateTime.Now.ToString("dd-MMMM-yyyy HHmmss") + ".xlsx";
             app.Workbooks[1].SaveAs(resultpathlocation + filenameresult, Excel.XlFileFormat.xlOpenXMLWorkbook, Missing.Value,
@@ -179,8 +189,8 @@ namespace WindowsFormsApp1
             Missing.Value, Missing.Value, Missing.Value);
             w1.Close(0);
             w2.Close(0);
-            //w3.Close(0);
-            //w4.Close(0);
+            w3.Close(0);
+            w4.Close(0);
             app.Workbooks.Close();
             app.Quit();
 
@@ -235,8 +245,7 @@ namespace WindowsFormsApp1
                         listBox1.Items.Add(System.IO.Path.Combine(pathlocation, splitName[splitName.Length - 1]));
                         File.Copy(item, pathlocation + splitName[splitName.Length - 1]);
                         count++;
-                        MessageBox.Show(Convert.ToString(count) + " File(s) copied");
-                    
+                        #region
                         //foreach (string item in openFileDialog1.FileNames)
                         //{
                         //    FilenameName = item.Split('\\');
@@ -244,10 +253,11 @@ namespace WindowsFormsApp1
                         //    listBox1.Items.Add(System.IO.Path.Combine(extractPath, FilenameName[FilenameName.Length - 1]));
                         //    count++;
                         //}
+                        #endregion
                     }
                     else
                     {
-                        MessageBox.Show("Filename must be {Reconcile_Paperless_*.xlsx}", "Warning", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                        MessageBox.Show("Filename must be {" + name + "*.xlsx}", "Warning", MessageBoxButtons.OK, MessageBoxIcon.Warning);
 
                     }
                 }
@@ -257,8 +267,8 @@ namespace WindowsFormsApp1
 
         private void upload_button_Click(object sender, EventArgs e)
         {
-            int count = 0;
-            string[] FilenameName;
+            //int count = 0;
+            //string[] FilenameName;
             string pathlocation = @"C:\pandora\data\export\source\";
 
             if (listBox1.Items.Count > 0)
@@ -274,9 +284,9 @@ namespace WindowsFormsApp1
 
                         File.Copy(item, pathlocation + splitName[splitName.Length - 1]);
                         listBox2.Items.Add(System.IO.Path.Combine(pathlocation, splitName[splitName.Length - 1]));
-                        count++;
+                        //count++;
                     }
-                    MessageBox.Show(Convert.ToString(count) + " File(s) copied");
+                    MessageBox.Show(Convert.ToString(listBox1.Items.Count) + " File(s) copied");
                     #region move list2 with selected
                     //for (int intCount = listBox1.SelectedItems.Count - 1; intCount >= 0; intCount--)
                     //{
@@ -294,7 +304,6 @@ namespace WindowsFormsApp1
                     //{
                     //}
                     #endregion
-
                     listBox1.Items.Clear();
                     delete_multiple_file();
 
