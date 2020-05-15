@@ -71,14 +71,17 @@ namespace WindowsFormsApp1
 
         }
 
+
+    
         private void List_1()
         {
             DirectoryInfo dinfo = new DirectoryInfo(@"C:\\pandora\\data\\export\\source\\temp\\");
             FileInfo[] Files = dinfo.GetFiles("*.xlsx");
-            foreach (FileInfo file in Files)
-            {
+               foreach (FileInfo file in Files)
+                    {
                 listBox1.Items.Add(file.FullName);
             }
+
         }
 
         private void List_2()
@@ -90,15 +93,17 @@ namespace WindowsFormsApp1
                 listBox2.Items.Add(file.FullName); //note FullName, not Name
             }
         }
+
         private void Form1_Load(object sender, EventArgs e)
         {
             generate_button.Text = "Generate";
             browse_button.Text = "Browse";
-            upload_button.Text = "Upload";
+            upload_button.Text = ">>";
 
             List_1();
             List_2();
         }
+
 
         private static void MergeExcelNew()       
         {
@@ -157,30 +162,20 @@ namespace WindowsFormsApp1
             Excel.Workbook w2 = app.Workbooks.Add(pathlocation + excelfilename + CDM);
             Excel.Workbook w3 = app.Workbooks.Add(pathlocation + excelfilename + IWID);
             Excel.Workbook w4 = app.Workbooks.Add(pathlocation + excelfilename + Count);
+            
+            string filename = "Reconcile_Paperless_*.xlsx";
 
-
-            //string[] ext = new string[2] { "*.xlsx", "*.xls" };
-
-            //foreach (string found in ext)
-            //{
-            //    string[] extracted = Directory.GetFiles(@"C:\pandora\data\export\source", found, System.IO.SearchOption.AllDirectories);
-            //    foreach (string file in extracted)
-            //    {
-            //        Console.WriteLine(file);
-            //    }
-            //}
-
-
-
-            int wb_count = app.Workbooks.Count;
-                    for (int i = 2; i <= wb_count; i++)
+          
+                int wb_count = app.Workbooks.Count;
+                for (int i = 2; i <= wb_count; i++)
+                {
+                    for (int j = 1; j <= app.Workbooks[i].Worksheets.Count; j++)
                     {
-                        for (int j = 1; j <= app.Workbooks[i].Worksheets.Count; j++)
-                        {
-                            Excel.Worksheet ws = (Excel.Worksheet)app.Workbooks[i].Worksheets[j];
-                            ws.Copy(Before: app.Workbooks[1].Worksheets[1]);
-                        }
+                        Excel.Worksheet ws = (Excel.Worksheet)app.Workbooks[i].Worksheets[j];
+                        ws.Copy(Before: app.Workbooks[1].Worksheets[1]);
                     }
+                }
+            
             app.Worksheets["Sheet1"].Delete();
             string filenameresult = "Reconcile_Paperless" + DateTime.Now.ToString("dd-MMMM-yyyy HHmmss") + ".xlsx";
             app.Workbooks[1].SaveAs(resultpathlocation + filenameresult, Excel.XlFileFormat.xlOpenXMLWorkbook, Missing.Value,
