@@ -18,10 +18,7 @@ namespace WindowsFormsApp1
         public Form1()
         {
             InitializeComponent();
-            generate_button.Text = "Generate";
-            browse_button.Text = "Browse";
-            upload_button.Text = "Upload";
-
+           
             listBox2.MouseDoubleClick += new MouseEventHandler(listBox2_DoubleClick);
             listBox1.MouseDoubleClick += new MouseEventHandler(listBox1_DoubleClick);
         }
@@ -95,6 +92,10 @@ namespace WindowsFormsApp1
         }
         private void Form1_Load(object sender, EventArgs e)
         {
+            generate_button.Text = "Generate";
+            browse_button.Text = "Browse";
+            upload_button.Text = "Upload";
+
             List_1();
             List_2();
         }
@@ -153,12 +154,15 @@ namespace WindowsFormsApp1
             string Count = "Count.xlsx";
 
             Excel.Workbook w1 = app.Workbooks.Add(@"C:\pandora\data\export\Reconcile_Paperless.xlsx");
-            Excel.Workbook w2 = app.Workbooks.Add(pathlocation + excelfilename + CDM);
-            Excel.Workbook w3 = app.Workbooks.Add(pathlocation + excelfilename + IWID);
-            Excel.Workbook w4 = app.Workbooks.Add(pathlocation + excelfilename + Count);
+            //Excel.Workbook w2 = app.Workbooks.Add(pathlocation + excelfilename + CDM);
+            //Excel.Workbook w3 = app.Workbooks.Add(pathlocation + excelfilename + IWID);
+            //Excel.Workbook w4 = app.Workbooks.Add(pathlocation + excelfilename + Count);
 
-           
-                for (int i = 2; i <= app.Workbooks.Count; i++)
+            //Excel.Workbook w2 = app.Workbooks.Add("C:\\pandora\\data\\export\\source\\**.xlsx", 0, true, 5, "", "", true, Microsoft.Office.Interop.Excel.XlPlatform.xlWindows, "\t", false, false, 0, true, 1, 0);
+            Excel.Workbook w2 = app.Workbooks.Add("C:\\pandora\\data\\export\\source\\**.xlsx");
+
+
+            for (int i = 2; i <= app.Workbooks.Count; i++)
                 {
                     for (int j = 1; j <= app.Workbooks[i].Worksheets.Count; j++)
                     {
@@ -175,8 +179,8 @@ namespace WindowsFormsApp1
             Missing.Value, Missing.Value, Missing.Value);
             w1.Close(0);
             w2.Close(0);
-            w3.Close(0);
-            w4.Close(0);
+            //w3.Close(0);
+            //w4.Close(0);
             app.Workbooks.Close();
             app.Quit();
 
@@ -199,6 +203,18 @@ namespace WindowsFormsApp1
             this.openFileDialog1.FilterIndex = 2;
             this.openFileDialog1.RestoreDirectory = true;
             this.openFileDialog1.Multiselect = true;
+            this.openFileDialog1.ValidateNames = false;
+            this.openFileDialog1.CheckFileExists = false;
+            this.openFileDialog1.CheckPathExists = true;
+
+            this.openFileDialog1.FileOk += delegate (object s, CancelEventArgs ev) {
+                var size = new FileInfo(this.openFileDialog1.FileName).Length;
+                if (size > 250000)
+                {
+                    MessageBox.Show("Sorry, file is too large");
+                    ev.Cancel = true;             // <== here
+                }
+            };
 
             if (openFileDialog1.ShowDialog() == DialogResult.OK) // Test result.
             {
@@ -216,10 +232,11 @@ namespace WindowsFormsApp1
                     //validate filename
                     if (fileName.StartsWith(name) && fileName.EndsWith(ext))
                     {
-                        File.Copy(item, pathlocation + splitName[splitName.Length - 1]);
                         listBox1.Items.Add(System.IO.Path.Combine(pathlocation, splitName[splitName.Length - 1]));
+                        File.Copy(item, pathlocation + splitName[splitName.Length - 1]);
                         count++;
-
+                        MessageBox.Show(Convert.ToString(count) + " File(s) copied");
+                    
                         //foreach (string item in openFileDialog1.FileNames)
                         //{
                         //    FilenameName = item.Split('\\');
@@ -230,7 +247,7 @@ namespace WindowsFormsApp1
                     }
                     else
                     {
-                        MessageBox.Show("Filename must be {Reconcile_Paperless_*.xlsx}", "Warning", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                        MessageBox.Show("Filename must be {Reconcile_Paperless_*.xlsx}", "Warning", MessageBoxButtons.OK, MessageBoxIcon.Warning);
 
                     }
                 }
@@ -249,15 +266,17 @@ namespace WindowsFormsApp1
                 DialogResult result = MessageBox.Show("Please do check again your files?", "Confirmation", MessageBoxButtons.YesNoCancel);
                 if (result == DialogResult.Yes)
                 {
-                    // do what you want!!
-                    foreach (string item in openFileDialog1.FileNames)
-                    { 
-                        FilenameName = item.Split('\\');
-                        File.Copy(item, pathlocation + FilenameName[FilenameName.Length - 1]);
+                    // check list value loop listbox
+                    foreach (string item in listBox1.Items) //openFileDialog1.FileNames)
+                    {
+                        string[] splitName = item.Split('\\');
+                        string fileName = splitName[splitName.Length - 1];
+
+                        File.Copy(item, pathlocation + splitName[splitName.Length - 1]);
+                        listBox2.Items.Add(System.IO.Path.Combine(pathlocation, splitName[splitName.Length - 1]));
                         count++;
                     }
                     MessageBox.Show(Convert.ToString(count) + " File(s) copied");
-
                     #region move list2 with selected
                     //for (int intCount = listBox1.SelectedItems.Count - 1; intCount >= 0; intCount--)
                     //{
@@ -265,19 +284,19 @@ namespace WindowsFormsApp1
                     //    listBox1.Items.Remove(listBox1.SelectedItems[intCount]);
                     //}
                     #endregion
-                    
+
                     ////move list2 all
-                    DirectoryInfo dinfo = new DirectoryInfo(pathlocation);
-                    FileInfo[] Files = dinfo.GetFiles("*.xlsx");
-                    foreach (FileInfo file in Files)
-                    {
-                        listBox2.Items.Add(file.FullName);
-                        listBox1.Items.Clear();
-                    }
+                    #region
+                    //DirectoryInfo dinfo = new DirectoryInfo(pathlocation);
+                    //FileInfo[] Files = dinfo.GetFiles("*.xlsx");
 
-                    //delete multiple files
+                    //foreach (FileInfo file in Files)
+                    //{
+                    //}
+                    #endregion
+
+                    listBox1.Items.Clear();
                     delete_multiple_file();
-
 
                     #region
                     //for (int i = 0; i < listBox1.Items.Count; i++)
@@ -322,9 +341,7 @@ namespace WindowsFormsApp1
                 if (File.Exists(filepath))
                     File.Delete(filepath);
                 listBox1.Items.RemoveAt(listBox1.SelectedIndex);
-
             }
-
         }
     }
 }
